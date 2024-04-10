@@ -50,3 +50,10 @@ export interface CourseDetail {
     hasWebVTT: boolean
     datePublished: string
 }
+
+export interface TsSegment {
+    tsURL: string
+    method: string
+    keyURL: string
+    iv: Uint8Array
+}

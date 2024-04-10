@@ -2,7 +2,7 @@ import {get} from "./request/index.ts";
 import {CourseDetail, Lesson} from "./types.d.ts";
 import {fs, path} from './deps.ts'
 import {pad} from "./utils.ts";
-import {parseM3u8Index} from "./m3u8.ts"
+import {parseM3u8Index, parseM3u8, downloadTsSegments} from "./m3u8.ts"
 
 
 // 获取课程信息
@@ -61,7 +61,7 @@ export async function writeTo(course: CourseDetail, dest: string) {
     }
 }
 
-// 笔记内容
+// 生成笔记内容
 async function noteContent(lesson: Lesson, course: CourseDetail, root: string) {
     console.log(`${lesson.index}: ${lesson.title}`)
     const m3u8IndexURL = await getM3u8Source(lesson)
@@ -79,7 +79,7 @@ async function noteContent(lesson: Lesson, course: CourseDetail, root: string) {
     // 下载字幕文件
     await downloadVTT(lesson, course, root)
     // 下载视频文件
-    // await downloadM3u8(lesson, course, root)
+    await downloadM3u8(m3u8Streams[0].url, lesson, root)
 
     let md = ''
 
@@ -95,7 +95,7 @@ async function noteContent(lesson: Lesson, course: CourseDetail, root: string) {
     md += '\n> ' + '中文翻译\n\n'
 
     // 写入视频
-    md += `![[../attachments/${pad(lesson.index, 2)}-${lesson.slug}.mp4]]\n\n`
+    md += `![[../attachments/${pad(lesson.index+1, 2)}-${lesson.slug}.mp4]]\n\n`
 
     // 写入所有 m3u8 资源
     md += '## 更多m3u8资源\n'
@@ -121,11 +121,15 @@ export async function getM3u8Source(lesson: Lesson): Promise<string | null> {
 export async function downloadVTT(lesson: Lesson, course: CourseDetail, root: string) {
     const url = `https://captions.frontendmasters.com/assets/courses/${course.datePublished}-${course.slug}/${lesson.index}-${lesson.slug}.vtt`
     const vtt = await get(url).then(resp => resp.text())
-    const filepath = path.join(root, `attachments/${pad(lesson.index, 2)}-${lesson.slug}.vtt`)
+    const filepath = path.join(root, `attachments/${pad(lesson.index+1, 2)}-${lesson.slug}.vtt`)
     Deno.writeTextFileSync(filepath, vtt)
 }
 
 // 下载 m3u8 文件，转为 mp4，并保存在 attachments 目录下
-export async function downloadM3u8(url: string, lesson: Lesson, course: CourseDetail, root: string) {
-    const m3u8 = await get(url).then(resp => resp.text())
+export async function downloadM3u8(m3u8Url: string, lesson: Lesson, root: string) {
+    console.log(`downloading ${lesson.slug}`)
+    const segments = await parseM3u8(m3u8Url)
+    const data = await downloadTsSegments(segments, lesson.slug)
+    const filepath = path.join(root, `attachments/${pad(lesson.index+1, 2)}-${lesson.slug}.ts`)
+    Deno.writeFileSync(filepath, data)
 }
