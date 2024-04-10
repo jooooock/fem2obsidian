@@ -1,5 +1,7 @@
-import {getCourseInfo} from "../src/api.ts";
+import {getCourseInfo, writeTo, getM3u8Source} from "../src/api.ts";
+import {parseM3u8Index} from "../src/m3u8.ts"
 
-const course = await getCourseInfo('web-app-testing')
+const course = await getCourseInfo('https://frontendmasters.com/courses/javascript-quiz/')
 // console.log(course)
-Deno.writeTextFileSync('info.json', JSON.stringify(course, null, 2))
+//
+await writeTo(course, './dist')

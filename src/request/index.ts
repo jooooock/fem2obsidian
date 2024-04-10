@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 
-import { UserAgent, Referer, Origin } from "./config.ts";
+import { UserAgent, Referer, Origin, Cookie } from "./config.ts";
 
 function stringifyQuery(
   query: Record<string, string | number | boolean> = {},
@@ -25,6 +25,7 @@ export function get(
     "User-Agent": UserAgent,
     "Referer": Referer,
     "Origin": Origin,
+    "Cookie": Cookie,
     ...header,
   };
   return fetch(url, {
@@ -45,6 +46,7 @@ function post(
     "User-Agent": UserAgent,
     "Referer": Referer,
     "Origin": Origin,
+    "Cookie": Cookie,
     ...header,
   };
 
