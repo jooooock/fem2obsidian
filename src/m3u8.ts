@@ -74,7 +74,6 @@ export async function downloadTsSegments(segments: TsSegment[], slug: string) {
                 return
             }
 
-            // console.log(`${slug}: 开始 [${currentIdx}/${segments.length}]`)
             const segment = segments[currentIdx]
             // 下载 ts
             const blob = await get(segment.tsURL).then(resp => resp.arrayBuffer())
@@ -88,12 +87,12 @@ export async function downloadTsSegments(segments: TsSegment[], slug: string) {
             // 解密
             raws[currentIdx] = new AESDecryptor(key).decrypt(blob, 0, segment.iv.buffer, true)
 
-            console.log(`${slug}: 完成 ${currentIdx}/${segments.length}`)
+            console.log(`${slug}: 完成 ${currentIdx+1}/${segments.length}`)
 
-            if (downloadingIndex < segments.length) {
-                await download()
-            } else {
+            if (raws.filter(e => e === undefined).length === 0) {
                 resolve(raws)
+            } else {
+                await download()
             }
         }
 

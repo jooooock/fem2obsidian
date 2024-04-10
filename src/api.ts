@@ -79,13 +79,13 @@ async function noteContent(lesson: Lesson, course: CourseDetail, root: string) {
     // 下载字幕文件
     await downloadVTT(lesson, course, root)
     // 下载视频文件
-    await downloadM3u8(m3u8Streams[0].url, lesson, root)
+    await downloadM3u8(m3u8Streams[2].url, lesson, root)
 
     let md = ''
 
     // 写入 frontmatter
     md += '---\n'
-    md += `m3u8: ${m3u8Streams[0].url}\n`
+    md += `m3u8: ${m3u8Streams[2].url}\n`
     md += '---\n'
 
     // 写入 description
@@ -121,7 +121,7 @@ export async function getM3u8Source(lesson: Lesson): Promise<string | null> {
 export async function downloadVTT(lesson: Lesson, course: CourseDetail, root: string) {
     const url = `https://captions.frontendmasters.com/assets/courses/${course.datePublished}-${course.slug}/${lesson.index}-${lesson.slug}.vtt`
     const vtt = await get(url).then(resp => resp.text())
-    const filepath = path.join(root, `attachments/${pad(lesson.index+1, 2)}-${lesson.slug}.vtt`)
+    const filepath = path.join(root, `attachments/${pad(lesson.index+1, 2)}-${lesson.slug}.en.vtt`)
     Deno.writeTextFileSync(filepath, vtt)
 }
 
