@@ -32,7 +32,7 @@ interface Lesson {
     annotations: LessonAnnotation[]
 }
 
-export interface CourseDetail {
+export interface CourseInfo {
     slug: string
     title: string
     description: string

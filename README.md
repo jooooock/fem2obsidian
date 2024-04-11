@@ -5,21 +5,29 @@
 ## obsidian笔记目录结构
 
 ```txt
-- course slug
+- Course Title
   attachments
+      01-slug.mp4
+      01-slug.vtt
+      slides.pdf
   _index.md
-  section1
-      01-slug.md
-      02-slug.md
-  section2
-      03-slug.md
-      04-slug.md
+  01 - section1
+      01 - slug.md
+      02 - slug.md
+  02 - section2
+      03 - slug.md
+      04 - slug.md
 ```
 
 ## obsidian笔记内容
 
 ```txt
 ---
+2160p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_2160p_Q10_20mbps.m3u8
+1440p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_1440p_Q10_9mbps.m3u8
+1080p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_1080_Q10_7mbps.m3u8
+720p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_720_Q8_5mbps.m3u8
+360p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_360_Q8_2mbps.m3u8
 m3u8: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_1080_Q10_7mbps.m3u8
 ---
 
@@ -29,13 +37,6 @@ m3u8: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_
 
 ![[attachments/01-introduction.mp4]]
 
-## 更多m3u8资源
-```txt
-2160p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_2160p_Q10_20mbps.m3u8
-1440p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_1440p_Q10_9mbps.m3u8
-1080p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_1080_Q10_7mbps.m3u8
-720p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_720_Q8_5mbps.m3u8
-360p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_360_Q8_2mbps.m3u8
 ```
 
 ## 索引文件结构(_index.md)
@@ -78,11 +79,4 @@ published: 2024-02-20
 [[10 - Miscellaneous]]
 [[11 - Wrapping Up]]
 
-```
-
-## 附件目录结构
-```txt
-01-introduction.mp4
-01-introduction.vtt
-slides.pdf
 ```

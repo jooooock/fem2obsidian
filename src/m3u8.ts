@@ -53,12 +53,12 @@ export async function parseM3u8(url: string) {
 }
 
 // 下载 m3u8 中的 ts 片段
-export async function downloadTsSegments(segments: TsSegment[], slug: string) {
+export async function downloadTsSegments(segments: TsSegment[]) {
     // 判断 key 是否一样
     let isSingleKey = false
     let commonKey: ArrayBuffer
     if (new Set(segments.map(s => s.keyURL)).size === 1) {
-        console.log('using single key')
+        console.log('>> using single key')
         commonKey = await get(segments[0].keyURL).then(resp => resp.arrayBuffer())
         isSingleKey = true
     }
@@ -87,7 +87,7 @@ export async function downloadTsSegments(segments: TsSegment[], slug: string) {
             // 解密
             raws[currentIdx] = new AESDecryptor(key).decrypt(blob, 0, segment.iv.buffer, true)
 
-            console.log(`${slug}: 完成 ${currentIdx+1}/${segments.length}`)
+            console.log(`>> ${raws.filter(e => e !== undefined).length}/${segments.length}`)
 
             if (raws.filter(e => e === undefined).length === 0) {
                 resolve(raws)
