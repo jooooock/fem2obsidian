@@ -1,6 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
 
-import { UserAgent, Referer, Origin, Cookie } from "./config.ts";
+import { UserAgent, Referer, Origin } from "./config.ts";
+import {cookieManager} from "./cookie.ts";
+
 
 function stringifyQuery(
   query: Record<string, string | number | boolean> = {},
@@ -21,11 +23,14 @@ export function get(
   if (Object.keys(query).length) {
     url += "?" + new URLSearchParams(stringifyQuery(query)).toString();
   }
+
+  const cookies = cookieManager.query(url)
+
   const headers: Record<string, string> = {
     "User-Agent": UserAgent,
     "Referer": Referer,
     "Origin": Origin,
-    "Cookie": Cookie,
+    "Cookie": cookies.map(cookie => `${cookie.name}=${cookie.value}`).join(';'),
     ...header,
   };
   return fetch(url, {
@@ -41,12 +46,14 @@ function post(
   format = "json",
   header: Record<string, string> = {},
 ) {
+  const cookies = cookieManager.query(url)
+
   let body;
   const headers: Record<string, string> | undefined = {
     "User-Agent": UserAgent,
     "Referer": Referer,
     "Origin": Origin,
-    "Cookie": Cookie,
+    "Cookie": cookies.map(cookie => `${cookie.name}=${cookie.value}`).join(';'),
     ...header,
   };
 

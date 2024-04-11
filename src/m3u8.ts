@@ -1,6 +1,7 @@
 import {get} from "./request/index.ts";
 import {TsSegment} from "./types.d.ts";
 import {AESDecryptor} from "./aes-decryptor.js"
+import {cookieManager} from "./request/cookie.ts";
 
 export async function parseM3u8Index(url: string) {
     const m3u8 = await get(url).then(resp => resp.text())
@@ -45,8 +46,11 @@ export async function parseM3u8(url: string) {
         // todo: ts 没有加密
     }
     if (segments.length <= 0) {
+        console.log(url)
         console.log('m3u8内容为:')
         console.log(m3u8)
+        console.log(cookieManager.all())
+        console.log(cookieManager.query(url))
         throw new Error('解析 m3u8 失败: ts片段为0')
     }
     return segments

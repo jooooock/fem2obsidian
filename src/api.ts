@@ -4,6 +4,7 @@ import {fs, path, DOMParser} from './deps.ts'
 import {pad} from "./utils.ts"
 import {parseM3u8Index, parseM3u8, downloadTsSegments} from "./m3u8.ts"
 import {MarkdownWriter} from "./markdown.ts"
+import {cookieManager} from "./request/cookie.ts";
 
 
 /**
@@ -191,7 +192,7 @@ async function makeIndexNote(course: CourseInfo) {
  */
 async function makeNoteContent(lesson: Lesson, course: CourseInfo, root: string) {
     console.log(`\ncreating note for [${lessonNoteName(lesson)}]`)
-    const m3u8IndexURL = await getLessonSource(lesson)
+    const m3u8IndexURL = await getLessonSource(lesson.hash)
     if (!m3u8IndexURL) {
         console.log(lesson)
         throw new Error('获取视频的 m3u8 数据失败')
@@ -255,13 +256,23 @@ async function makeNoteContent(lesson: Lesson, course: CourseInfo, root: string)
 }
 
 
-export async function getLessonSource(lesson: Lesson): Promise<string | null> {
-    console.log(`> fetching m3u8 index`)
-    const resp = await get(`https://api.frontendmasters.com/v1/kabuki/video/${lesson.hash}/source`, {
+export async function getLessonSource(hash: string): Promise<string | null> {
+    console.log(`> fetching m3u8 index file`)
+    const resp = await get(`https://api.frontendmasters.com/v1/kabuki/video/${hash}/source`, {
         f: 'm3u8'
-    }).then(resp => resp.json())
-    if (resp && typeof resp === 'object' && 'url' in resp) {
-        return resp.url
+    })
+
+    // 设置 cookie
+    resp.headers.getSetCookie().forEach(str => {
+        const cookie = cookieManager.parse(str, 'https://api.frontendmasters.com/v1/kabuki/video')
+        if (cookie) {
+            cookieManager.set(cookie)
+        }
+    })
+
+    const json = await resp.json()
+    if (json && typeof json === 'object' && 'url' in json) {
+        return json.url as string
     }
     return null
 }

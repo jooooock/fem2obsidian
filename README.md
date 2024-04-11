@@ -80,3 +80,43 @@ published: 2024-02-20
 [[11 - Wrapping Up]]
 
 ```
+
+---
+
+## 爬虫原理
+
+首先调用 `https://api.frontendmasters.com/v1/kabuki/courses/${slug}` 接口获取课程详情数据，该接口需要使用登录Cookie：
+
+```
+fem_auth_mod=xxx;
+```
+
+### 下载附件资源
+
+下载附件资源时不需要任何cookie信息(公开的)
+
+
+### 创建索引笔记 _index.md
+
+此过程不涉及接口调用
+
+
+### 创建笔记 note.md
+
+首先调用接口 `https://api.frontendmasters.com/v1/kabuki/video/${hash}/source` 获取 m3u8 索引文件，该接口需要使用登录Cookie：
+
+```
+fem_auth_mod=xxx;
+```
+
+在响应中会有6个`Set_Cookie`：
+```txt
+CloudFront-Policy=; Path=/2024/02/20/[course-hash]; Domain=frontendmasters.com; HttpOnly
+CloudFront-Signature=; Path=/2024/02/20/[course-hash]; Domain=frontendmasters.com; HttpOnly
+CloudFront-Key-Pair-Id=; Path=/2024/02/20/[course-hash]; Domain=frontendmasters.com; HttpOnly
+
+CloudFront-Policy=; Path=/[course-hash]-[lesson-hash]; Domain=frontendmasters.com; HttpOnly
+CloudFront-Signature=; Path=/[course-hash]-[lesson-hash]; Domain=frontendmasters.com; HttpOnly
+CloudFront-Key-Pair-Id=; Path=/[course-hash]-[lesson-hash]; Domain=frontendmasters.com; HttpOnly
+```
+这些 Cookie 用于后续下载视频ts片段与密码时使用。
