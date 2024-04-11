@@ -29,7 +29,7 @@ interface Lesson {
     statsId: string
     hash: string
     timestamp: string
-    annotations: LessonAnnotation[]
+    annotations?: LessonAnnotation[]
 }
 
 export interface CourseInfo {
@@ -56,4 +56,8 @@ export interface TsSegment {
     method: string
     keyURL: string
     iv: Uint8Array
+}
+
+export interface HtmlInfo {
+    topics: string[]
 }

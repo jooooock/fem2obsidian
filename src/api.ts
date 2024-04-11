@@ -1,6 +1,6 @@
 import {get} from "./request/index.ts"
-import {CourseInfo, Lesson} from "./types.d.ts"
-import {fs, path} from './deps.ts'
+import {CourseInfo, HtmlInfo, Lesson} from "./types.d.ts"
+import {fs, path, DOMParser} from './deps.ts'
 import {pad} from "./utils.ts"
 import {parseM3u8Index, parseM3u8, downloadTsSegments} from "./m3u8.ts"
 import {MarkdownWriter} from "./markdown.ts"
@@ -36,6 +36,19 @@ function parseSlug(url: string) {
     return matchResult.groups.slug
 }
 
+/**
+ * 从 html 中解析额外的数据
+ * @param slug
+ */
+export async function parseInfoFromHtml(slug: string): Promise<HtmlInfo> {
+    const html = await get(`https://frontendmasters.com/courses/${slug}/`).then(resp => resp.text())
+    const document = new DOMParser().parseFromString(html, 'text/html')
+    const topics: string[] = document.querySelectorAll('#main-content > .MediaHeader .CourseCollectionsList span:contains("Topics:") + ul > li').map(li => li.textContent)
+
+    return {
+        topics,
+    }
+}
 
 /**
  * 下载课程信息
@@ -52,8 +65,11 @@ export async function downloadCourse(course: CourseInfo, dest: string) {
     // 创建 attachments 目录
     Deno.mkdirSync(path.join(root, 'attachments'))
 
+    // 下载附件
+    await downloadResources(course, root)
+
     // 创建 _index.md
-    Deno.writeTextFileSync(path.join(root, '_index.md'), '')
+    Deno.writeTextFileSync(path.join(root, '_index.md'), await makeIndexNote(course))
 
     let currentDirectory
     let index = 1
@@ -75,6 +91,96 @@ export async function downloadCourse(course: CourseInfo, dest: string) {
 function lessonNoteName(lesson: Lesson) {
     const prefix = pad(lesson.index + 1, 2)
     return `${prefix} - ${lesson.slug}.md`
+}
+
+function courseDuration(course: CourseInfo) {
+    const lastLessonHash = course.lessonHashes.at(-1)!
+    const lastLessonTimestamp = course.lessonData[lastLessonHash].timestamp
+    return lastLessonTimestamp.split('-')[1].trim()
+}
+
+function lessonDuration(timestamp: string) {
+    const [start, end] = timestamp.split(' - ')
+    const [s1, s2, s3] = start.split(':').map(_ => parseInt(_))
+    let [e1, e2, e3] = end.split(':').map(_ => parseInt(_))
+    if (e3 < s3) {
+        if (e2 > 0) {
+            e2--
+            e3 += 60
+        } else {
+            e1--
+            e2 = 59
+            e3 += 60
+        }
+    }
+    if (e2 < s2) {
+        e1--
+        e2 += 60
+    }
+    return `${pad(e1 - s1, 2)}:${pad(e2 - s2, 2)}:${pad(e3 - s3, 2)}`
+}
+
+
+/**
+ * 生成索引文件内容
+ * @param course
+ */
+async function makeIndexNote(course: CourseInfo) {
+    console.log(`\ncreating index note`)
+
+    const writer = new MarkdownWriter()
+
+    const {topics} = await parseInfoFromHtml(course.slug)
+
+    // Frontmatter
+    const frontmatter = {
+        title: course.title,
+        tags: topics,
+        author: course.instructors.map(instructor => instructor.name),
+        duration: courseDuration(course),
+        published: course.datePublished,
+        isTrial: course.isTrial,
+        hasHLS: course.hasHLS,
+        hasTranscript: course.hasTranscript,
+        hasWebVTT: course.hasWebVTT,
+        hasIntroLoop: course.hasIntroLoop,
+    }
+    writer.writeFrontMatter(frontmatter)
+
+    // Logo
+    writer.writeLine('## Logo', 1)
+    writer.writeLine(`![200](${course.thumbnail})`, 1)
+
+    // Description
+    writer.writeLine('## Description', 1)
+    writer.writeLine(course.description, 1)
+
+    // Slides
+    const pdfResources = course.resources.filter(resource => resource.url.endsWith('.pdf'))
+    if (pdfResources.length > 0) {
+        writer.writeLine('## Slides', 1)
+        pdfResources.forEach(resource => {
+            writer.writeLine(`![[attachments/${path.basename(resource.url)}]]`, 1)
+        })
+    }
+
+    writer.writeLine('## Table of Contents')
+    let sectionIndex = 0
+    let sectionTitle: string
+    course.lessonElements.forEach(item => {
+        if (typeof item === 'string') {
+            sectionTitle = item
+            sectionIndex++
+            writer.writeLine(`\n### ${item}`, 1)
+        } else {
+            const hash = course.lessonHashes[item]
+            const lesson = course.lessonData[hash]
+            writer.writeLine(`[[${pad(sectionIndex, 2)} - ${sectionTitle}/${pad(lesson.index + 1, 2)} - ${lesson.slug}|${pad(lesson.index + 1, 2)} - ${lesson.title}]]`)
+        }
+    })
+
+
+    return writer.toString()
 }
 
 /**
@@ -103,35 +209,51 @@ async function makeNoteContent(lesson: Lesson, course: CourseInfo, root: string)
     // 2: 1920x1080
     // 3: 1280x720
     // 4: 640x360
-    const defaultResolution = 0
+    const defaultResolution = 4
 
     // 下载字幕文件
     await downloadVTT(lesson, course, root)
     // 下载视频文件
     await downloadM3u8(m3u8Streams[defaultResolution].url, lesson, root)
 
-    const mdWriter = new MarkdownWriter()
+    const writer = new MarkdownWriter()
 
     // 写入 frontmatter
     const frontmatter: Record<string, string> = {}
     m3u8Streams.forEach(stream => {
         frontmatter[stream.resolution] = stream.url
     })
-    frontmatter['m3u8'] = m3u8Streams[defaultResolution].url
-    mdWriter.writeFrontMatter(frontmatter)
+    Object.assign(frontmatter, {
+        m3u8: m3u8Streams[defaultResolution].url,
+        hash: lesson.hash,
+        timestamp: lesson.timestamp,
+        duration: lessonDuration(lesson.timestamp),
+    })
+
+    writer.writeFrontMatter(frontmatter)
 
     // 写入 description
-    mdWriter.writeLine(lesson.description)
+    writer.writeLine(lesson.description)
 
     // 写入 description 的中文翻译
-    mdWriter.writeBlockquote('中文翻译')
+    writer.writeBlockquote('中文翻译')
 
     // 写入视频
-    mdWriter.writeLine(`![[../attachments/${pad(lesson.index + 1, 2)}-${lesson.slug}.mp4]]`)
-    mdWriter.writeBlankLine(2)
+    writer.writeLine(`![[../attachments/${pad(lesson.index + 1, 2)}-${lesson.slug}.mp4]]`, 2)
 
-    return mdWriter.toString()
+    // 写入 annotations
+    if (lesson.annotations) {
+        writer.writeLine('## Annotations', 1)
+        lesson.annotations.forEach(annotation => {
+            writer.writeLine(`- ${annotation.message}`)
+        })
+    }
+
+    writer.writeBlankLine(2)
+
+    return writer.toString()
 }
+
 
 export async function getLessonSource(lesson: Lesson): Promise<string | null> {
     console.log(`> fetching m3u8 index`)
@@ -160,4 +282,17 @@ export async function downloadM3u8(m3u8Url: string, lesson: Lesson, root: string
     const data = await downloadTsSegments(segments)
     const filepath = path.join(root, `attachments/${pad(lesson.index + 1, 2)}-${lesson.slug}.ts`)
     Deno.writeFileSync(filepath, data)
+}
+
+// 下载课程附件资源
+async function downloadResources(course: CourseInfo, root: string) {
+    for (let i = 0; i < course.resources.length; i++) {
+        const resource = course.resources[i]
+        if (resource.url.endsWith('.pdf')) {
+            const filename = path.basename(resource.url)
+            console.log(`> downloading resource [${filename}]`)
+            const data = await get(resource.url).then(resp => resp.arrayBuffer())
+            Deno.writeFileSync(path.join(root, `attachments/${filename}`), new Uint8Array(data))
+        }
+    }
 }

@@ -5,6 +5,7 @@
   "author": "Jock",
   "license": "LGPL-3.0-or-later",
   "scripts": {
+    "start": "deno run -A src/index.ts",
     "test": "deno run -A test/index.ts"
   }
 }

@@ -67,7 +67,7 @@ published: 2024-02-20
 
 ### Introduction
 
-[[01 - Introduction]]
+[[01 - Introduction/01 - introduction|01 - Introduction]]
 [[02 - Event Loop & Task Queue]]
 [[03 - Scope & Closure]]
 [[04 - this keyword]]
