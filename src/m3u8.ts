@@ -3,6 +3,7 @@ import {TsSegment} from "./types.d.ts";
 import {AESDecryptor} from "./aes-decryptor.js"
 import {cookieManager} from "./request/cookie.ts";
 
+
 export async function parseM3u8Index(url: string) {
     const m3u8 = await get(url).then(resp => resp.text())
     const lines = m3u8.split('\n')

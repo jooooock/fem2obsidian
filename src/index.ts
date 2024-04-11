@@ -9,6 +9,6 @@ export async function run(courses: string[], dest: string) {
 }
 
 await run([
-    // 'https://frontendmasters.com/courses/javascript-quiz/',
+    'https://frontendmasters.com/courses/javascript-quiz/',
     'https://frontendmasters.com/courses/web-app-testing/',
 ], '/Users/champ/ObsidianVaults/FrontendMasters')

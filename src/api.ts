@@ -1,7 +1,7 @@
 import {get} from "./request/index.ts"
 import {CourseInfo, HtmlInfo, Lesson} from "./types.d.ts"
 import {fs, path, DOMParser} from './deps.ts'
-import {pad} from "./utils.ts"
+import {convertVideo, pad} from "./utils.ts"
 import {parseM3u8Index, parseM3u8, downloadTsSegments} from "./m3u8.ts"
 import {MarkdownWriter} from "./markdown.ts"
 import {cookieManager} from "./request/cookie.ts";
@@ -215,7 +215,10 @@ async function makeNoteContent(lesson: Lesson, course: CourseInfo, root: string)
     // 下载字幕文件
     await downloadVTT(lesson, course, root)
     // 下载视频文件
-    await downloadM3u8(m3u8Streams[defaultResolution].url, lesson, root)
+    const videoPath = await downloadM3u8(m3u8Streams[defaultResolution].url, lesson, root)
+
+    // 将 ts 视频转为 mp4 视频
+    await convertVideo(videoPath)
 
     const writer = new MarkdownWriter()
 
@@ -293,6 +296,7 @@ export async function downloadM3u8(m3u8Url: string, lesson: Lesson, root: string
     const data = await downloadTsSegments(segments)
     const filepath = path.join(root, `attachments/${pad(lesson.index + 1, 2)}-${lesson.slug}.ts`)
     Deno.writeFileSync(filepath, data)
+    return filepath
 }
 
 // 下载课程附件资源
