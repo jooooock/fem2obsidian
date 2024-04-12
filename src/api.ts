@@ -87,7 +87,7 @@ export async function downloadVTT(lesson: Lesson, course: CourseInfo, root: stri
 export async function downloadM3u8(m3u8Url: string, lesson: Lesson, root: string) {
     const filepath = path.join(root, `attachments/${pad(lesson.index + 1, 2)}-${lesson.slug}.ts`)
     if (fs.existsSync(filepath)) {
-        return
+        return filepath
     }
 
     console.log(`..  downloading video`)
