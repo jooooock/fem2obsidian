@@ -29,7 +29,7 @@
 ```
 
 
-## 索引笔记模板(00 - slug.md)
+## 索引笔记模板(slug.md)
 
 ```txt
 ---
@@ -112,6 +112,31 @@ annotations: 2
 - note2
 
 ```
+
+## 如何使用
+
+1. 安装 Deno 环境，参考 https://docs.deno.com/runtime/manual#install-deno
+2. 在项目根目录下创建`.env`文件，内容如下：
+    ```dotenv
+    # 将你的账号对应的 fem_auth_mod cookie填入下方
+    FEM_AUTH_MOD=
+    ```
+3. 在`src/index.ts`中配置需要下载的课程地址及保存目录：
+    ```ts
+    import {Downloader} from "./downloader.ts";
+    
+    
+    const downloader = new Downloader('/Users/jock/ObsidianVaults/FrontendMasters')
+    
+    await downloader.add([
+        'https://frontendmasters.com/courses/javascript-quiz/',
+        'https://frontendmasters.com/courses/javascript-cpu-vm/',
+        'https://frontendmasters.com/courses/blazingly-fast-js/',
+        'https://frontendmasters.com/courses/web-app-performance/',
+        'https://frontendmasters.com/courses/web-dev-quiz/',
+    ]).start()
+    ```
+4. 执行命令`deno task start`开始下载。
 
 ---
 
@@ -837,7 +862,7 @@ annotations: 2
 下载附件资源时不需要任何cookie信息(公开的)
 
 
-### 创建索引笔记 _index.md
+### 创建索引笔记 slug.md
 
 此过程不涉及接口调用
 
