@@ -143,6 +143,9 @@ export class Downloader {
         writer.writeLine('## Description', 1)
         writer.writeLine(courseData.description, 1)
 
+        // 写入 description 的中文翻译
+        writer.writeBlockquote('中文翻译')
+
         // Slides
         const slidesResources = courseData.resources.filter(resource => resource.url.endsWith('.pdf') || /slides/i.test(resource.label))
         if (slidesResources.length > 0) {
@@ -153,11 +156,11 @@ export class Downloader {
         }
 
         // Github
-        const githubResources = courseData.resources.filter(resource => /github/i.test(resource.label))
+        const githubResources = courseData.resources.filter(resource => /(github|code)/i.test(resource.label))
         if (githubResources.length > 0) {
             writer.writeLine('## Github', 1)
-            slidesResources.forEach(resource => {
-                writer.writeLine(`![${resource.label}](${resource.url})`, 1)
+            githubResources.forEach(resource => {
+                writer.writeLine(`[${resource.label}](${resource.url})`, 1)
             })
         }
 
@@ -273,6 +276,7 @@ export class Downloader {
             course.data = data
             course.root = path.join(this.dest, data.title)
 
+            Deno.writeTextFileSync(`debug/${course.slug}.json`, JSON.stringify(course, null, 2))
             await this.download(course)
         }
     }

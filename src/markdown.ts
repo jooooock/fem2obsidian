@@ -15,7 +15,11 @@ export class MarkdownWriter {
                     this.writeLine(`  - ${v}`)
                 })
             } else {
-                this.writeLine(`${key}: ${value}`)
+                if (typeof value === 'string' && value.includes(':')) {
+                    this.writeLine(`${key}: "${value}"`)
+                } else {
+                    this.writeLine(`${key}: ${value}`)
+                }
             }
         })
         this.writeLine('---')
