@@ -5,7 +5,7 @@ import {
     parseCourseSlug,
     convertVideo,
     lessonDuration,
-    greenText
+    greenText, blueText
 } from "./utils.ts";
 import {downloadResources, getCourseInfo, getVideoSource, parseInfoFromHtml, downloadVTT, downloadM3u8} from "./api.ts";
 import {CourseInfo, HtmlInfo, Lesson, VideoResolution} from "./types.d.ts";
@@ -69,7 +69,15 @@ export class Downloader {
         if (fs.existsSync(root)) {
             Deno.removeSync(root, {recursive: true})
         }
-        Deno.mkdirSync(root, {recursive: true})
+        this.mkdirSync(root)
+    }
+
+    // 创建目录，如果已经存在则直接返回
+    mkdirSync(path: string) {
+        if (fs.existsSync(path)) {
+            return
+        }
+        Deno.mkdirSync(path, {recursive: true})
     }
 
 
@@ -78,10 +86,9 @@ export class Downloader {
         const root = course.root!
         const courseData = course.data!
 
-        this.emptyRoot(root)
 
         // 创建 attachments 目录
-        Deno.mkdirSync(path.join(root, 'attachments'))
+        this.mkdirSync(path.join(root, 'attachments'))
 
         // 下载附件
         await downloadResources(courseData, root)
@@ -97,7 +104,7 @@ export class Downloader {
                 // 创建章节目录
                 const prefix = pad(index++, 2)
                 sectionDirectory = path.join(root, `${prefix} - ${item}`)
-                Deno.mkdirSync(sectionDirectory)
+                this.mkdirSync(sectionDirectory)
             } else if (typeof item === 'number') {
                 // 创建视频笔记 video.md
                 const hash = courseData.lessonHashes[item]
@@ -127,6 +134,7 @@ export class Downloader {
             author: courseData.instructors.map(instructor => instructor.name),
             duration: courseDuration(courseData),
             published: courseData.datePublished,
+            lessons: courseData.lessonSlugs.length,
             isTrial: courseData.isTrial,
             hasHLS: courseData.hasHLS,
             hasTranscript: courseData.hasTranscript,
@@ -141,7 +149,7 @@ export class Downloader {
 
         // Description
         writer.writeLine('## Description', 1)
-        writer.writeLine(courseData.description, 1)
+        writer.writeLine(courseData.description)
 
         // 写入 description 的中文翻译
         writer.writeBlockquote('中文翻译')
@@ -190,40 +198,38 @@ export class Downloader {
      * @param course
      */
     async writeVideoNote(sectionDirectory: string, lesson: Lesson, course: Course) {
-        console.log(`. [${greenText(lessonNoteName(lesson))}]`)
+        console.log(`. [${greenText(lessonNoteName(lesson))}|${blueText(course.data!.lessonSlugs.length)}]`)
 
         const root = course.root!
 
         // 下载字幕文件
-        console.log(`..  downloading vtt`)
         await downloadVTT(lesson, course.data!, root)
 
         // 下载视频文件
-        console.log(`..  fetching m3u8 source`)
-        const m3u8IndexURL = await getVideoSource(lesson.hash)
-        if (!m3u8IndexURL) {
-            console.log(lesson)
-            throw new Error('获取视频的 m3u8 数据失败')
+        if (!fs.existsSync(path.join(root, `attachments/${pad(lesson.index + 1, 2)}-${lesson.slug}.mp4`))) {
+            const m3u8IndexURL = await getVideoSource(lesson.hash)
+            if (!m3u8IndexURL) {
+                console.log(lesson)
+                throw new Error('获取视频的 m3u8 数据失败')
+            }
+
+            const m3u8Streams = await parseM3u8Index(m3u8IndexURL)
+            if (m3u8Streams.length <= 0) {
+                console.log(lesson)
+                throw new Error('该视频的 m3u8 视频流列表为空')
+            }
+
+            const targetStream = m3u8Streams.find(s => s.p === this.resolution.replace(/p$/, ''))
+            if (!targetStream) {
+                console.log(`指定分辨率(${this.resolution})的视频不存在`)
+                return
+            }
+
+            const videoPath = await downloadM3u8(targetStream.url, lesson, root)
+
+            // 将 ts 视频转为 mp4 视频
+            await convertVideo(videoPath)
         }
-
-        const m3u8Streams = await parseM3u8Index(m3u8IndexURL)
-        if (m3u8Streams.length <= 0) {
-            console.log(lesson)
-            throw new Error('该视频的 m3u8 视频流列表为空')
-        }
-
-        const targetStream = m3u8Streams.find(s => s.p === this.resolution.replace(/p$/, ''))
-        if (!targetStream) {
-            console.log(`指定分辨率(${this.resolution})的视频不存在`)
-            return
-        }
-
-        console.log(`..  downloading video`)
-        const videoPath = await downloadM3u8(targetStream.url, lesson, root)
-
-        // 将 ts 视频转为 mp4 视频
-        console.log(`..  converting ts to mp4`)
-        await convertVideo(videoPath)
 
 
         // 开始输出 md 笔记

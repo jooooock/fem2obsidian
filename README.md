@@ -43,6 +43,7 @@ author:
   - Lydia Hallie
 duration: 02:22:12
 published: 2024-02-20
+lessons: 10
 isTrial: false
 hasHLS: true
 hasTranscript: true

@@ -57,6 +57,7 @@ export function lessonDuration(timestamp: string) {
 }
 
 export function convertVideo(input: string): Promise<void> {
+    console.log(`..  converting ts to mp4`)
     const outputFile = input.replace(/\.ts$/, '.mp4')
     return new Promise((resolve) => {
         ffmpeg(input)
@@ -86,4 +87,9 @@ export function convertVideo(input: string): Promise<void> {
 export function greenText(text: string, strong = false) {
     const t = strong ? colors.bold(text) : text
     return colors.green(t)
+}
+
+export function blueText(text: string | number, strong = true) {
+    const t = strong ? colors.bold(text.toString()) : text.toString()
+    return colors.blue(t)
 }

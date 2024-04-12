@@ -1,10 +1,11 @@
 import {get} from "./request/index.ts"
 import {CourseInfo, HtmlInfo, Lesson} from "./types.d.ts"
-import {path, DOMParser} from './deps.ts'
+import {fs, path, DOMParser} from './deps.ts'
 import {greenText, pad} from "./utils.ts"
 import {parseM3u8TsSegments, downloadTsSegments} from "./m3u8.ts"
 import {cookieManager} from "./request/cookie.ts"
 import logger from "./logger.ts"
+
 
 
 
@@ -37,6 +38,7 @@ export async function parseInfoFromHtml(slug: string): Promise<HtmlInfo> {
  * @param hash
  */
 export async function getVideoSource(hash: string): Promise<string | null> {
+    console.log(`..  fetching m3u8 source`)
     const resp = await get(`https://api.frontendmasters.com/v1/kabuki/video/${hash}/source`, {
         f: 'm3u8'
     })
@@ -64,9 +66,14 @@ export async function getVideoSource(hash: string): Promise<string | null> {
  * @param root
  */
 export async function downloadVTT(lesson: Lesson, course: CourseInfo, root: string) {
+    const filepath = path.join(root, `attachments/${pad(lesson.index + 1, 2)}-${lesson.slug}.en.vtt`)
+    if (fs.existsSync(filepath)) {
+        return
+    }
+
+    console.log(`..  downloading vtt`)
     const url = `https://captions.frontendmasters.com/assets/courses/${course.datePublished}-${course.slug}/${lesson.index}-${lesson.slug}.vtt`
     const vtt = await get(url).then(resp => resp.text())
-    const filepath = path.join(root, `attachments/${pad(lesson.index + 1, 2)}-${lesson.slug}.en.vtt`)
     Deno.writeTextFileSync(filepath, vtt)
 }
 
@@ -78,9 +85,14 @@ export async function downloadVTT(lesson: Lesson, course: CourseInfo, root: stri
  * @param root
  */
 export async function downloadM3u8(m3u8Url: string, lesson: Lesson, root: string) {
+    const filepath = path.join(root, `attachments/${pad(lesson.index + 1, 2)}-${lesson.slug}.ts`)
+    if (fs.existsSync(filepath)) {
+        return
+    }
+
+    console.log(`..  downloading video`)
     const segments = await parseM3u8TsSegments(m3u8Url)
     const data = await downloadTsSegments(segments)
-    const filepath = path.join(root, `attachments/${pad(lesson.index + 1, 2)}-${lesson.slug}.ts`)
     Deno.writeFileSync(filepath, data)
     return filepath
 }
@@ -96,10 +108,14 @@ export async function downloadResources(course: CourseInfo, root: string) {
         const resource = course.resources[i]
         if (resource.url.endsWith('.pdf')) {
             const filename = path.basename(resource.url)
-            console.log(`. downloading resource [${greenText(filename)}]`)
+            const filepath = path.join(root, `attachments/${filename}`)
+            if (fs.existsSync(filepath)) {
+                continue
+            }
 
+            console.log(`. downloading resource [${greenText(filename)}]`)
             await get(resource.url).then(resp => resp.arrayBuffer()).then(data => {
-                Deno.writeFileSync(path.join(root, `attachments/${filename}`), new Uint8Array(data))
+                Deno.writeFileSync(filepath, new Uint8Array(data))
             }).catch(e => {
                 logger.error("download resource file failed", {course: course.slug, resource: resource}, e)
             })
