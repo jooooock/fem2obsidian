@@ -70,3 +70,5 @@ export interface ConvertProgress {
     timemark: string
     percent: number
 }
+
+export type VideoResolution = '2160p' | '1440p' | '1080p' | '720p' | '360p'

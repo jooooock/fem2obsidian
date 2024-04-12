@@ -1,7 +1,8 @@
 import {get} from "./request/index.ts";
 import {TsSegment} from "./types.d.ts";
-import {AESDecryptor} from "./aes-decryptor.js"
+import {AESDecryptor} from "./aes-decryptor.ts"
 import {cookieManager} from "./request/cookie.ts";
+import {delay, ProgressBar} from "./deps.ts";
 
 
 export async function parseM3u8Index(url: string) {
@@ -13,9 +14,15 @@ export async function parseM3u8Index(url: string) {
         if (line.startsWith('#EXT-X-STREAM-INF:')) {
             const matchResult = line.match(/RESOLUTION=(?<resolution>\d+x\d+)/)
             if (matchResult && matchResult.groups) {
+                const resolution = matchResult.groups['resolution']
+                let p: string | null = null
+                if (resolution && resolution.split('x').length === 2) {
+                    p = resolution.split('x')[1]
+                }
                 streams.push({
                     url: new URL(lines[i+1], url).toString(),
-                    resolution: matchResult.groups['resolution'],
+                    resolution: resolution,
+                    p: p,
                 })
             }
         }
@@ -23,7 +30,7 @@ export async function parseM3u8Index(url: string) {
     return streams
 }
 
-export async function parseM3u8(url: string) {
+export async function parseM3u8TsSegments(url: string) {
     const m3u8 = await get(url).then(resp => resp.text())
     const lines = m3u8.split('\n')
     const segments: TsSegment[] = []
@@ -63,11 +70,17 @@ export async function downloadTsSegments(segments: TsSegment[]) {
     let isSingleKey = false
     let commonKey: ArrayBuffer
     if (new Set(segments.map(s => s.keyURL)).size === 1) {
-        console.log('>> using single key')
         commonKey = await get(segments[0].keyURL).then(resp => resp.arrayBuffer())
         isSingleKey = true
     }
 
+    const bar = new ProgressBar({
+        total: segments.length,
+        complete: "=",
+        incomplete: "-",
+        display: "[:bar] :completed/:total (:time)",
+        clear: true,
+    })
     // 并发下载 ts
     const chunks = await new Promise<ArrayBuffer[]>(resolve => {
         let downloadingIndex = 0
@@ -92,7 +105,9 @@ export async function downloadTsSegments(segments: TsSegment[]) {
             // 解密
             raws[currentIdx] = new AESDecryptor(key).decrypt(blob, 0, segment.iv.buffer, true)
 
-            console.log(`>> ${raws.filter(e => e !== undefined).length}/${segments.length}`)
+            // 进度显示
+            await bar.render(raws.filter(e => e !== undefined).length)
+            await delay(20)
 
             if (raws.filter(e => e === undefined).length === 0) {
                 resolve(raws)

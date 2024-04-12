@@ -11,7 +11,7 @@ interface Cookie {
 
 
 class CookieManager {
-    private _store: Map<string, Map<string, Cookie[]>>
+    private readonly _store: Map<string, Map<string, Cookie[]>>
 
     constructor() {
         // - domain1:

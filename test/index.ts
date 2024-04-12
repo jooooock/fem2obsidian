@@ -1,8 +1,10 @@
-import {getCourseInfo, downloadCourse, parseInfoFromHtml, getLessonSource} from "../src/api.ts";
-import {path, ffmpeg} from "../src/deps.ts"
-import {cookieManager} from "../src/request/cookie.ts"
+import logger from "../src/logger.ts";
+import {colors} from "../src/deps.ts"
+import {greenText} from "../src/utils.ts";
 
-// const course = await getCourseInfo('https://frontendmasters.com/courses/javascript-quiz/')
-// await downloadCourse(course, '/Users/champ/ObsidianVaults/FrontendMasters')
 
-// await getLessonSource('oiNhkAmptL')
+console.log(colors.green(colors.bold("123")))
+console.log(colors.green("123"))
+console.log(colors.brightGreen("123"))
+
+console.log(`this is ${greenText("123", true)} h`)
