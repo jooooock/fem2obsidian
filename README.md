@@ -86,15 +86,13 @@ hasIntroLoop: false
 
 ```txt
 ---
-2160p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_2160p_Q10_20mbps.m3u8
-1440p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_1440p_Q10_9mbps.m3u8
-1080p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_1080_Q10_7mbps.m3u8
-720p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_720_Q8_5mbps.m3u8
-360p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_360_Q8_2mbps.m3u8
+title: Introduction
+slug: introduction
 m3u8: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_1080_Q10_7mbps.m3u8
 hash: zkLGvGmhyp
 timestamp: 00:00:00 - 00:00:35
 duration: 00:00:35
+annotations: 2
 ---
 
 ## Description

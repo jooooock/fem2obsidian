@@ -194,7 +194,7 @@ export class Downloader {
         console.log(`..  downloading vtt`)
         await downloadVTT(lesson, course.data!, root)
 
-
+        // 下载视频文件
         console.log(`..  fetching m3u8 source`)
         const m3u8IndexURL = await getVideoSource(lesson.hash)
         if (!m3u8IndexURL) {
@@ -213,7 +213,7 @@ export class Downloader {
             console.log(`指定分辨率(${this.resolution})的视频不存在`)
             return
         }
-        // 下载视频文件
+
         console.log(`..  downloading video`)
         const videoPath = await downloadM3u8(targetStream.url, lesson, root)
 
@@ -226,16 +226,15 @@ export class Downloader {
         const writer = new MarkdownWriter()
 
         // 写入 frontmatter
-        const frontmatter: Record<string, string> = {}
-        m3u8Streams.forEach(stream => {
-            frontmatter[stream.resolution] = stream.url
-        })
-        Object.assign(frontmatter, {
+        const frontmatter: Record<string, string | number> = {
+            title: lesson.title,
+            slug: lesson.slug,
             m3u8: targetStream.url,
             hash: lesson.hash,
             timestamp: lesson.timestamp,
             duration: lessonDuration(lesson.timestamp),
-        })
+            annotationCount: lesson.annotations ? lesson.annotations.length : 0
+        }
         writer.writeFrontMatter(frontmatter)
 
         // 写入 description
