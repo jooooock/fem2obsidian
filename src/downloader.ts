@@ -122,6 +122,7 @@ export class Downloader {
         const frontmatter = {
             title: courseData.title,
             url: `https://frontendmasters.com/courses/${course.slug}/`,
+            slug: course.slug,
             tags: courseData.topics,
             author: courseData.instructors.map(instructor => instructor.name),
             duration: courseDuration(courseData),
@@ -175,7 +176,7 @@ export class Downloader {
             }
         })
 
-        Deno.writeTextFileSync(path.join(course.root!, '_index.md'), writer.toString())
+        Deno.writeTextFileSync(path.join(course.root!, `00 - ${course.slug}.md`), writer.toString())
     }
 
 
@@ -228,12 +229,10 @@ export class Downloader {
         // 写入 frontmatter
         const frontmatter: Record<string, string | number> = {
             title: lesson.title,
-            slug: lesson.slug,
-            m3u8: targetStream.url,
             hash: lesson.hash,
             timestamp: lesson.timestamp,
             duration: lessonDuration(lesson.timestamp),
-            annotationCount: lesson.annotations ? lesson.annotations.length : 0
+            annotations: lesson.annotations ? lesson.annotations.length : 0
         }
         writer.writeFrontMatter(frontmatter)
 

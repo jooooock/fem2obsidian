@@ -6,7 +6,7 @@
 
 ```txt
 ├── 课程标题1
-│   ├── _index.md                       # 索引笔记
+│   ├── 00 - slug.md                    # 索引笔记
 │   ├── 01 - Section                    # 章节目录1
 │   │   ├── 01 - slug.md                # 视频笔记1
 │   │   ├── 02 - slug.md                # 视频笔记2
@@ -24,17 +24,18 @@
 │       └── ...
 |
 ├── 课程标题2
-│   ├── _index.md                       # 索引笔记
+│   ├── 00 - slug.md                    # 索引笔记
 │   └── ...
 ```
 
 
-## 索引笔记模板(_index.md)
+## 索引笔记模板(00 - slug.md)
 
 ```txt
 ---
 title: Test Your JavaScript Knowledge
 url: https://frontendmasters.com/courses/web-app-testing/
+slug: web-app-testing
 tags:
   - JavaScript
   - Quiz
@@ -88,7 +89,6 @@ hasIntroLoop: false
 ---
 title: Introduction
 slug: introduction
-m3u8: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_1080_Q10_7mbps.m3u8
 hash: zkLGvGmhyp
 timestamp: 00:00:00 - 00:00:35
 duration: 00:00:35
