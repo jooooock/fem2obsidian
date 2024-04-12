@@ -109,7 +109,7 @@ export class Downloader {
 
 
     /**
-     * 创建 _index.md 索引笔记
+     * 创建 slug.md 索引笔记
      * @param course
      */
     writeIndexNote(course: Course) {
@@ -176,7 +176,7 @@ export class Downloader {
             }
         })
 
-        Deno.writeTextFileSync(path.join(course.root!, `00 - ${course.slug}.md`), writer.toString())
+        Deno.writeTextFileSync(path.join(course.root!, `${course.slug}.md`), writer.toString())
     }
 
 
