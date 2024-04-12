@@ -1,6 +1,6 @@
 import {get} from "./request/index.ts"
 import {CourseInfo, HtmlInfo, Lesson} from "./types.d.ts"
-import {path, DOMParser, delay} from './deps.ts'
+import {path, DOMParser} from './deps.ts'
 import {greenText, pad} from "./utils.ts"
 import {parseM3u8TsSegments, downloadTsSegments} from "./m3u8.ts"
 import {cookieManager} from "./request/cookie.ts"

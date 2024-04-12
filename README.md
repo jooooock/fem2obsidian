@@ -28,37 +28,25 @@
 │   └── ...
 ```
 
-## obsidian笔记模板
-
-```txt
----
-2160p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_2160p_Q10_20mbps.m3u8
-1440p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_1440p_Q10_9mbps.m3u8
-1080p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_1080_Q10_7mbps.m3u8
-720p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_720_Q8_5mbps.m3u8
-360p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_360_Q8_2mbps.m3u8
-m3u8: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_1080_Q10_7mbps.m3u8
----
-
-[[description]]
-
-> [[中文翻译]]
-
-![[attachments/01-introduction.mp4]]
-
-```
 
 ## 索引笔记模板(_index.md)
 
 ```txt
 ---
 title: Test Your JavaScript Knowledge
+url: https://frontendmasters.com/courses/web-app-testing/
 tags:
   - JavaScript
   - Quiz
-author: Lydia Hallie
-duration: 2 hours, 11 minutes
+author:
+  - Lydia Hallie
+duration: 02:22:12
 published: 2024-02-20
+isTrial: false
+hasHLS: true
+hasTranscript: true
+hasWebVTT: true
+hasIntroLoop: false
 ---
 ## Logo
 
@@ -71,6 +59,10 @@ published: 2024-02-20
 ## Slides
 
 ![[attachments/javascript-quiz-slides.pdf]]
+
+## Github
+
+![label](https://github.com/xxx)
 
 ## Table of Contents
 
@@ -87,6 +79,38 @@ published: 2024-02-20
 [[09 - Numbers]]
 [[10 - Miscellaneous]]
 [[11 - Wrapping Up]]
+
+```
+
+## obsidian笔记模板
+
+```txt
+---
+2160p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_2160p_Q10_20mbps.m3u8
+1440p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_1440p_Q10_9mbps.m3u8
+1080p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_1080_Q10_7mbps.m3u8
+720p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_720_Q8_5mbps.m3u8
+360p: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_360_Q8_2mbps.m3u8
+m3u8: https://stream.frontendmasters.com/2024/02/20/DTFDVKKHhY/oiNhkAmptL/index_1080_Q10_7mbps.m3u8
+hash: zkLGvGmhyp
+timestamp: 00:00:00 - 00:00:35
+duration: 00:00:35
+---
+
+## Description
+
+[[description]]
+
+> [[中文翻译]]
+
+## Video
+
+![[attachments/01-introduction.mp4]]
+
+## Annotations
+
+- note1
+- note2
 
 ```
 

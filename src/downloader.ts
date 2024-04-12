@@ -121,6 +121,7 @@ export class Downloader {
         // Frontmatter
         const frontmatter = {
             title: courseData.title,
+            url: `https://frontendmasters.com/courses/${course.slug}/`,
             tags: courseData.topics,
             author: courseData.instructors.map(instructor => instructor.name),
             duration: courseDuration(courseData),
@@ -142,11 +143,20 @@ export class Downloader {
         writer.writeLine(courseData.description, 1)
 
         // Slides
-        const pdfResources = courseData.resources.filter(resource => resource.url.endsWith('.pdf'))
-        if (pdfResources.length > 0) {
+        const slidesResources = courseData.resources.filter(resource => resource.url.endsWith('.pdf') || /slides/i.test(resource.label))
+        if (slidesResources.length > 0) {
             writer.writeLine('## Slides', 1)
-            pdfResources.forEach(resource => {
-                writer.writeLine(`![[attachments/${path.basename(resource.url)}]]`, 1)
+            slidesResources.forEach(resource => {
+                writer.writeLine(`![[attachments/${path.basename(resource.url)}|${resource.label}]]`, 1)
+            })
+        }
+
+        // Github
+        const githubResources = courseData.resources.filter(resource => /github/i.test(resource.label))
+        if (githubResources.length > 0) {
+            writer.writeLine('## Github', 1)
+            slidesResources.forEach(resource => {
+                writer.writeLine(`![${resource.label}](${resource.url})`, 1)
             })
         }
 
@@ -226,16 +236,17 @@ export class Downloader {
             timestamp: lesson.timestamp,
             duration: lessonDuration(lesson.timestamp),
         })
-
         writer.writeFrontMatter(frontmatter)
 
         // 写入 description
+        writer.writeLine('## Description', 1)
         writer.writeLine(lesson.description)
 
         // 写入 description 的中文翻译
         writer.writeBlockquote('中文翻译')
 
         // 写入视频
+        writer.writeLine('## Video', 1)
         writer.writeLine(`![[../attachments/${pad(lesson.index + 1, 2)}-${lesson.slug}.mp4]]`, 2)
 
         // 写入 annotations
