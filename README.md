@@ -5,18 +5,27 @@
 ## 生成的 obsidian 笔记目录结构
 
 ```txt
-- Course Title
-  attachments
-      01-slug.mp4
-      01-slug.vtt
-      slides.pdf
-  _index.md
-  01 - section1
-      01 - slug.md
-      02 - slug.md
-  02 - section2
-      03 - slug.md
-      04 - slug.md
+├── 课程标题1
+│   ├── _index.md                       # 索引笔记
+│   ├── 01 - Section                    # 章节目录1
+│   │   ├── 01 - slug.md                # 视频笔记1
+│   │   ├── 02 - slug.md                # 视频笔记2
+│   │   └── ...
+│   ├── 02 - Section                    # 章节目录2
+│   │   ├── 03 - slug.md                # 视频笔记3
+│   │   ├── 04 - slug.md                # 视频笔记4
+│   │   └── ...
+│   └── attachments                     # 附件目录
+│       ├── slide.pdf                   # 课程资源
+│       ├── 01-introduction.mp4         # 视频
+│       ├── 01-introduction.en.vtt      # 字幕
+│       ├── 02-xxx.mp4                  # 视频
+│       ├── 02-xxx.en.vtt               # 字幕
+│       └── ...
+|
+├── 课程标题2
+│   ├── _index.md                       # 索引笔记
+│   └── ...
 ```
 
 ## obsidian笔记模板
