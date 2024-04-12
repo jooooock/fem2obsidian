@@ -1,4 +1,6 @@
 // 代码来至 hls.js  https://github.com/video-dev/hls.js
+// @ts-nocheck: external lib
+
 
 function removePadding(buffer) {
     const outputBytes = buffer.byteLength;

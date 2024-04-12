@@ -23,8 +23,8 @@ interface Course {
 
 export class Downloader {
     private readonly dest: string
-    private courses: Course[]
-    private resolution: VideoResolution
+    private readonly courses: Course[]
+    private readonly resolution: VideoResolution
 
     constructor(dest: string, resolution: VideoResolution = '1080p') {
         this.dest = dest
@@ -73,8 +73,8 @@ export class Downloader {
     }
 
 
-    // 下载课程
-    async downloadCourse(course: Course) {
+    // 下载
+    async download(course: Course) {
         const root = course.root!
         const courseData = course.data!
 
@@ -90,7 +90,7 @@ export class Downloader {
         this.writeIndexNote(course)
         console.log()
 
-        let sectionDirectory: string
+        let sectionDirectory = ''
         let index = 1
         for (const item of courseData.lessonElements) {
             if (typeof item === 'string') {
@@ -102,14 +102,14 @@ export class Downloader {
                 // 创建视频笔记 video.md
                 const hash = courseData.lessonHashes[item]
                 const lesson = courseData.lessonData[hash]
-                await this.writeVideoNote(sectionDirectory!, lesson, course)
+                await this.writeVideoNote(sectionDirectory, lesson, course)
             }
         }
     }
 
 
     /**
-     * 创建 slug.md 索引笔记
+     * 创建索引笔记
      * @param course
      */
     writeIndexNote(course: Course) {
@@ -273,7 +273,7 @@ export class Downloader {
             course.data = data
             course.root = path.join(this.dest, data.title)
 
-            await this.downloadCourse(course)
+            await this.download(course)
         }
     }
 }
