@@ -55,6 +55,7 @@ export async function getVideoSource(hash: string): Promise<string | null> {
     if (json && typeof json === 'object' && 'url' in json) {
         return json.url as string
     }
+    console.log('json: ', json)
     return null
 }
 

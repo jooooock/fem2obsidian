@@ -9,7 +9,7 @@ import {
 } from "./utils.ts";
 import {downloadResources, getCourseInfo, getVideoSource, parseInfoFromHtml, downloadVTT, downloadM3u8} from "./api.ts";
 import {CourseInfo, HtmlInfo, Lesson, VideoResolution} from "./types.d.ts";
-import { fs, path } from "./deps.ts";
+import {delay, fs, path} from "./deps.ts";
 import {MarkdownWriter} from "./markdown.ts";
 import {parseM3u8Index} from "./m3u8.ts";
 
@@ -95,7 +95,7 @@ export class Downloader {
 
         // 创建 _index.md
         this.writeIndexNote(course)
-        console.log()
+        console.log() // 为了控制台好看
 
         let sectionDirectory = ''
         let index = 1
@@ -209,13 +209,13 @@ export class Downloader {
         if (!fs.existsSync(path.join(root, `attachments/${pad(lesson.index + 1, 2)}-${lesson.slug}.mp4`))) {
             const m3u8IndexURL = await getVideoSource(lesson.hash)
             if (!m3u8IndexURL) {
-                console.log(lesson)
+                console.log('lesson: ', lesson.slug)
                 throw new Error('获取视频的 m3u8 数据失败')
             }
 
             const m3u8Streams = await parseM3u8Index(m3u8IndexURL)
             if (m3u8Streams.length <= 0) {
-                console.log(lesson)
+                console.log(lesson.slug)
                 throw new Error('该视频的 m3u8 视频流列表为空')
             }
 
@@ -284,6 +284,9 @@ export class Downloader {
 
             Deno.writeTextFileSync(`debug/${course.slug}.json`, JSON.stringify(course, null, 2))
             await this.download(course)
+
+            // 每个课程下载完之后暂停5分钟
+            await delay(1000 * 60 * 5)
         }
     }
 }
