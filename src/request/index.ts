@@ -15,10 +15,11 @@ function stringifyQuery(
   return data;
 }
 
-export function get(
+export async function get(
   url: string,
   query: Record<string, string | number> = {},
   header: Record<string, string> = {},
+  timeout = 60 * 1000 * 2
 ) {
   if (Object.keys(query).length) {
     url += "?" + new URLSearchParams(stringifyQuery(query)).toString();
@@ -33,11 +34,22 @@ export function get(
     "Cookie": cookies.map(cookie => `${cookie.name}=${cookie.value}`).join(';'),
     ...header,
   };
-  return fetch(url, {
+
+  const controller = new AbortController();
+
+  const id = setTimeout(() => {
+    controller.abort()
+  }, timeout)
+
+  const resp = await fetch(url, {
     method: "GET",
-    cache: "default",
+    cache: "no-cache",
     headers,
+    signal: controller.signal,
   });
+
+  clearTimeout(id);
+  return resp;
 }
 
 function post(
@@ -45,6 +57,7 @@ function post(
   data: Record<string, any> = {},
   format = "json",
   header: Record<string, string> = {},
+  timeout = 60 * 1000 * 2
 ) {
   const cookies = cookieManager.query(url)
 
@@ -70,12 +83,22 @@ function post(
     });
     body = formData;
   }
-  return fetch(url, {
+
+  const controller = new AbortController();
+
+  const id = setTimeout(() => {
+    controller.abort()
+  }, timeout)
+
+  const resp = fetch(url, {
     method: "POST",
     cache: "no-store",
     body,
     headers,
+    signal: controller.signal,
   });
+  clearTimeout(id);
+  return resp;
 }
 
 export function postJSON(
@@ -100,4 +123,41 @@ export function postFormData(
   headers: Record<string, string> = {},
 ) {
   return post(url, data, "form-data", headers);
+}
+
+export function head(
+    url: string,
+    query: Record<string, string | number> = {},
+    header: Record<string, string> = {},
+    timeout = 60 * 1000 * 2
+) {
+  if (Object.keys(query).length) {
+    url += "?" + new URLSearchParams(stringifyQuery(query)).toString();
+  }
+
+  const cookies = cookieManager.query(url)
+
+  const headers: Record<string, string> = {
+    "User-Agent": UserAgent,
+    "Referer": Referer,
+    "Origin": Origin,
+    "Cookie": cookies.map(cookie => `${cookie.name}=${cookie.value}`).join(';'),
+    ...header,
+  };
+
+  const controller = new AbortController();
+
+  const id = setTimeout(() => {
+    controller.abort()
+  }, timeout)
+
+  const resp = fetch(url, {
+    method: "HEAD",
+    cache: "default",
+    headers,
+    signal: controller.signal,
+  });
+
+  clearTimeout(id);
+  return resp;
 }
